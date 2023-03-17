@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="magendoo_productdata_consumer" queue="magendoo_productdata_queue" connection="amqp" handler="Magendoo\ProductWebhook\Model\MessageQueue\Consumer::processMessage"/>
+</config>

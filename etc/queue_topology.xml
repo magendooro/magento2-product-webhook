@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="magendoo_productwebhook_exchange" type="topic" connection="amqp">
+        <binding id="ProductData" topic="magendoo.productdata.created" destinationType="queue" destination="magendoo_productdata_queue"/>
+    </exchange>
+</config>

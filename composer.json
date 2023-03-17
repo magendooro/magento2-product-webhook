@@ -1,0 +1,33 @@
+{
+    "name": "magendoo/product-webhook",
+    "description": "Magento 2 module to send product data to a 3rd party endpoint when a product is created",
+    "type": "magento2-module",
+    "authors": [
+        {
+            "name": "Florinel Chis",
+            "email": "florinel.chis@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Magendoo\\ProductWebhook\\": ""
+        }
+    },
+    "require": {
+        "php": "~7.4.0||~8.1.0",
+        "magento/framework": "~102.0.0||~103.0.0",
+        "magento/module-catalog": "~104.0.0||~105.0.0"
+    },
+    "extra": {
+        "map": [
+            [
+                "*",
+                "Magendoo_ProductWebhook"
+            ]
+        ]
+    }
+}
