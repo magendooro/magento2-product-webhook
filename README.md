@@ -25,24 +25,6 @@ It is useful for scenarios that involve additional data enriching workflows for 
 
 ---
 
-## 📚 Documentation
-
-**Comprehensive documentation is available in the `/docs/ProductWebhook/` folder:**
-
-- **[Implementation Summary](../../../../../docs/ProductWebhook/IMPLEMENTATION_SUMMARY.md)** - Complete overview of fixes and improvements
-- **[Code Review Fixes](../../../../../docs/ProductWebhook/CODE_REVIEW_FIXES.md)** - Detailed implementation guide with code examples
-- **[Fixes Summary](../../../../../docs/ProductWebhook/FIXES_SUMMARY.md)** - Quick reference of all changes
-
-**Documentation Path (from Magento root):**
-```
-docs/ProductWebhook/
-├── IMPLEMENTATION_SUMMARY.md  (500+ lines)
-├── CODE_REVIEW_FIXES.md       (2,624 lines)
-└── FIXES_SUMMARY.md           (284 lines)
-```
-
----
-
 ## Installation
 
 ### Via Direct Installation
@@ -296,9 +278,6 @@ app/code/Magendoo/ProductWebhook/
 
 ## Support & Documentation
 
-- **Module Documentation**: `/docs/ProductWebhook/` (from Magento root)
-- **Implementation Details**: See [IMPLEMENTATION_SUMMARY.md](../../../../../docs/ProductWebhook/IMPLEMENTATION_SUMMARY.md)
-- **Code Review Fixes**: See [CODE_REVIEW_FIXES.md](../../../../../docs/ProductWebhook/CODE_REVIEW_FIXES.md)
 - **Logs**: `var/log/product_webhook.log`
 - **Module Version**: 1.0.0
 - **Last Updated**: 2025-11-22
