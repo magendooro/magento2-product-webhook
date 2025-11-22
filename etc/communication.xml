@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/communication.xsd">
+    <topic name="magendoo.productdata.created" request="Magendoo\ProductWebhook\Api\Data\ProductDataInterface">
+        <handler name="productWebhookHandler" type="Magendoo\ProductWebhook\Model\MessageQueue\Consumer" method="processMessage" />
+    </topic>
+</config>

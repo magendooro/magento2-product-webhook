@@ -1,83 +1,116 @@
 <?php
+declare(strict_types=1);
+
 namespace Magendoo\ProductWebhook\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magendoo\ProductWebhook\Model\Config;
-use Magento\Framework\Serialize\Serializer\Json;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\MessageQueue\PublisherInterface;
+use Magendoo\ProductWebhook\Model\Config;
+use Magendoo\ProductWebhook\Model\DataFilter;
+use Magendoo\ProductWebhook\Model\WebhookSender;
+use Psr\Log\LoggerInterface;
 
 /**
- * Class ProductSaveAfter
- * @package Magendoo\ProductWebhook\Observer
+ * Observer for catalog_product_save_after event
+ * Sends product data to webhook or queue
  */
 class ProductSaveAfter implements ObserverInterface
 {
     /**
      * @var Config
      */
-    private $config;
-
-    /**
-     * @var Json
-     */
-    private $jsonSerializer;
-
-    /**
-     * @var Curl
-     */
-    private $curlClient;
+    private Config $config;
 
     /**
      * @var PublisherInterface
      */
-    private $publisher;
+    private PublisherInterface $publisher;
 
     /**
-     * constructor
-     *
+     * @var WebhookSender
+     */
+    private WebhookSender $webhookSender;
+
+    /**
+     * @var DataFilter
+     */
+    private DataFilter $dataFilter;
+
+    /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
+    /**
      * @param Config $config
-     * @param Json $jsonSerializer
-     * @param Curl $curlClient
+     * @param PublisherInterface $publisher
+     * @param WebhookSender $webhookSender
+     * @param DataFilter $dataFilter
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Config $config,
-        Json $jsonSerializer,
-        Curl $curlClient,
-        PublisherInterface $publisher
-
+        PublisherInterface $publisher,
+        WebhookSender $webhookSender,
+        DataFilter $dataFilter,
+        LoggerInterface $logger
     ) {
         $this->config = $config;
-        $this->jsonSerializer = $jsonSerializer;
-        $this->curlClient = $curlClient;
         $this->publisher = $publisher;
+        $this->webhookSender = $webhookSender;
+        $this->dataFilter = $dataFilter;
+        $this->logger = $logger;
     }
 
     /**
+     * Execute observer
+     *
      * @param Observer $observer
+     * @return void
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
         $product = $observer->getEvent()->getProduct();
-        $storeId = $product->getStoreId();
-        $endpoint = $this->config->getEndpoint($storeId);
 
-        $product = $observer->getEvent()->getProduct();
-        $storeId = $product->getStoreId();
-        $productData = $product->getData();
+        if (!$product || !$product->getId()) {
+            $this->logger->warning('Product save observer triggered without valid product');
+            return;
+        }
 
-        if ($this->config->isUsingQueue($storeId)) {            
-            $this->publisher->publish('magendoo.productdata.created', $productData);
-        } else {        
-            if ($endpoint) {                
-                $productJson = $this->jsonSerializer->serialize($productData);
-                $this->curlClient->setOption(CURLOPT_RETURNTRANSFER, true);
-                $this->curlClient->setOption(CURLOPT_TIMEOUT, 5);
-                $this->curlClient->setOption(CURLOPT_CONNECTTIMEOUT, 5);
-                $this->curlClient->addHeader('Content-Type', 'application/json');
-                $this->curlClient->post($endpoint, $productJson);
+        $storeId = (int) $product->getStoreId();
+
+        if (!$this->config->isEnabled($storeId)) {
+            $this->logger->debug('Webhook disabled for store', ['store_id' => $storeId]);
+            return;
+        }
+
+        try {
+            // Filter sensitive data
+            $productData = $this->dataFilter->filterProductData($product->getData());
+
+            if ($this->config->isUsingQueue($storeId)) {
+                $this->logger->info('Publishing product data to queue', [
+                    'product_id' => $product->getId(),
+                    'store_id' => $storeId
+                ]);
+
+                $this->publisher->publish('magendoo.productdata.created', $productData);
+            } else {
+                $this->logger->info('Sending product data to webhook directly', [
+                    'product_id' => $product->getId(),
+                    'store_id' => $storeId
+                ]);
+
+                $this->webhookSender->send($productData, $storeId);
             }
+        } catch (\Exception $e) {
+            // Log but don't fail product save
+            $this->logger->critical('Failed to process product webhook', [
+                'product_id' => $product->getId(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
     }
 }

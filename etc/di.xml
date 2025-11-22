@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Virtual logger for webhook -->
+    <virtualType name="Magendoo\ProductWebhook\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/product_webhook.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Magendoo\ProductWebhook\Logger\Logger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">productWebhook</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Magendoo\ProductWebhook\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Inject virtual logger into module classes -->
+    <type name="Magendoo\ProductWebhook\Observer\ProductSaveAfter">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magendoo\ProductWebhook\Model\MessageQueue\Consumer">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magendoo\ProductWebhook\Model\WebhookSender">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magendoo\ProductWebhook\Model\Config">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magendoo\ProductWebhook\Model\UrlValidator">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+
+    <type name="Magendoo\ProductWebhook\Model\DataFilter">
+        <arguments>
+            <argument name="logger" xsi:type="object">Magendoo\ProductWebhook\Logger\Logger</argument>
+        </arguments>
+    </type>
+</config>
